@@ -84,15 +84,11 @@ const strToHex = (str) =>
     .map((s) => s.charCodeAt(0).toString(16))
     .join('');
 
-const hexToStr = (hex) => {
-  let str = '';
-
-  for (let i = 0; i < hex.length; i += 2) {
-    str += String.fromCharCode(parseInt(hex.substring(i, i + 2), 16));
-  }
-
-  return str;
-};
+const hexToStr = (hex) =>
+  new Array(hex.length / 2)
+    .fill()
+    .map((_, i) => String.fromCharCode(parseInt(hex.substring(i * 2, i * 2 + 2), 16)))
+    .join('');
 
 const bin = (key) =>
   chunkString(key, 2)
@@ -102,7 +98,7 @@ const bin = (key) =>
 const shiftString = (str, shift) => str.slice(shift, str.length) + str.slice(0, shift);
 
 const keySchedule = (key) => {
-  const subkeys = [],
+  const subKeys = [],
     perm = PC1.map((index) => key[index - 1]).join('');
   let C0 = perm.substring(0, perm.length / 2),
     D0 = perm.substring(perm.length / 2),
@@ -115,51 +111,52 @@ const keySchedule = (key) => {
     prevC0 = C0;
     prevD0 = D0;
     let pair = C0 + D0;
-    subkeys.push(PC2.map((index) => pair[index - 1]).join(''));
+    subKeys.push(PC2.map((index) => pair[index - 1]).join(''));
   });
 
-  return subkeys;
+  return subKeys;
 };
 
 const expandBlock = (block) => E.map((index) => block[index - 1]).join('');
 
-const stringXOR = (str1, str2, len) => {
-  let xor = Array(len);
-  for (let i = 0; i < len; i++) {
-    xor[i] = str1[i] === str2[i] ? 0 : 1;
-  }
-  return xor.join('');
-};
+const stringXOR = (str1, str2, len) =>
+  Array(len)
+    .fill()
+    .map((_, i) => (str1[i] === str2[i] ? 0 : 1))
+    .join('');
 
-const sBoxOutput = (bits) => {
-  return chunkString(bits, 6)
+const sBoxOutput = (bits) =>
+  chunkString(bits, 6)
     .map((group, sBox) => {
-      let row = parseInt(group[0] + group[5], 2);
-      let col = parseInt(group.slice(1, 5), 2);
+      let row = parseInt(group[0] + group[5], 2),
+        col = parseInt(group.slice(1, 5), 2);
+
       return decToBin(S[sBox][16 * row + col]);
     })
     .join('');
-};
 
 //************************************************************* */
 //************** MAIN DES FUNCTION ****************** */
-const des = (msg, key, subkeys) => {
-  let perm = IP.map((index) => msg[index - 1]).join(''); // init permute (IP)
-  let L0 = perm.substring(0, perm.length / 2);
-  let R0 = perm.substring(perm.length / 2);
-
-  let prevL0 = L0,
+const des = (msg, key, subKeys) => {
+  let perm = IP.map((index) => msg[index - 1]).join(''),
+    L0 = perm.substring(0, perm.length / 2),
+    R0 = perm.substring(perm.length / 2),
+    prevL0 = L0,
     prevR0 = R0;
+
   for (let i = 0; i < 16; i++) {
     L0 = prevR0;
-    let sBoxOut = sBoxOutput(stringXOR(subkeys[i], expandBlock(R0), 48));
-    let finalPerm = P.map((index) => sBoxOut[index - 1]).join('');
+    let sBoxOut = sBoxOutput(stringXOR(subKeys[i], expandBlock(R0), 48)),
+      finalPerm = P.map((index) => sBoxOut[index - 1]).join('');
+
     R0 = stringXOR(prevL0, finalPerm, 32);
     prevL0 = L0;
     prevR0 = R0;
   }
-  let pair = R0 + L0;
-  let enc = FINAL_IP.map((index) => pair[index - 1]).join('');
+
+  let pair = R0 + L0,
+    enc = FINAL_IP.map((index) => pair[index - 1]).join('');
+
   return chunkString(enc, 4).map(binToHex).join('').toUpperCase();
 };
 
@@ -172,10 +169,6 @@ const encode = (msg, key) => des(msg, key, keySchedule(key));
 const decode = (msg, key) => des(msg, key, keySchedule(key).reverse());
 
 //************************************************************* */
-//************** KEY ****************** */
-const key = bin('133457799BBCDFF2');
-
-//************************************************************* */
 //************** SELECTING DOM ELEMENTS ****************** */
 const formInput = document.getElementById('form__input');
 const formKey = document.getElementById('form__input--key');
@@ -184,93 +177,70 @@ const decryptBtn = document.getElementById('btn__decrypt');
 const tbody = document.getElementById('tbody');
 const html = `<tr class="table__row--data"><td class="table__data">%Plain%</td><td class="table__data table__data--right">%Cipher%</td></tr>`;
 
-const fetchData = async () => {
-  console.log('this runs');
-  const fetching = await fetch('https://todo-29872-default-rtdb.firebaseio.com/', {
-    Method: 'GET',
-    mode: 'no-cors',
-    Headers: {
-      'content-type': 'application/json',
-    },
-  });
+//************************************************************* */
+//************** ENCRYPT / DECRYPT EVENT HANDLER FUNCTION ****************** */
+const encDec = (e) => {
+  e.preventDefault();
 
-  const data = fetching.json();
+  const target = e.target.innerText,
+    inputValue = formInput.value,
+    inputKey = formKey.value,
+    key =
+      inputKey.match(/([g-zG-Z])\w+/) !== null
+        ? inputKey.length === 8
+          ? bin(strToHex(inputKey))
+          : alert('The Key Size Should Be 8 Characters Long i.e., 64 Bits.')
+        : inputKey.match(/([a-fA-F])\w+/) !== null
+        ? inputKey.length === 16
+          ? bin(inputKey)
+          : alert('The Key Size Should Be 16 Hex Characters Long i.e., 64 Bits.')
+        : inputKey.length === 64
+        ? inputKey
+        : alert('The Key Size Should Be 64 Bits Long');
 
-  console.log('fetching...', data);
+  if (inputValue.trim().length > 0) {
+    let output = '';
+    const msg =
+      target === 'Encrypt'
+        ? inputValue.match(/([g-zG-Z])\w+/) === null
+          ? inputValue
+          : strToHex(inputValue)
+        : inputValue;
+
+    if (msg.length > 16)
+      for (let i = 0; i < Math.ceil(msg.length / 16); i++) {
+        let slicedMsg = msg.slice(i * 16, (i + 1) * 16);
+
+        if (target === 'Encrypt') {
+          if (slicedMsg.length < 16) slicedMsg = slicedMsg.padStart(16, '0');
+
+          output += encode(bin(slicedMsg), key);
+        } else {
+          const decodedStr = decode(bin(slicedMsg), key);
+
+          output += decodedStr.match(/0+/)[0].length > 1 ? decodedStr.replace(/0+/, '') : decodedStr;
+        }
+      }
+    else output = target === 'Encrypt' ? encode(bin(msg), key) : decode(bin(msg), key);
+
+    tbody.insertAdjacentHTML(
+      'beforeend',
+      html
+        .replace('%Plain%', `<b>${target === 'Encrypt' ? 'Plain' : 'Cipher'} Text: </b>${inputValue}`)
+        .replace(
+          '%Cipher%',
+          `<b>${target === 'Encrypt' ? 'Cipher' : 'Plain'} Text: </b>${
+            target === 'Encrypt' ? output : hexToStr(output)
+          }`,
+        ),
+    );
+  } else alert(`Please Enter Text to ${target}. This Field Can Not Be Empty.`);
 };
-
-fetchData();
 
 //************************************************************* */
 //************** ENCRYPT BUTTON ****************** */
-encryptBtn.addEventListener('click', (e) => {
-  e.preventDefault();
-  const inputValue = formInput.value;
-  const inputKey = formKey.value;
-  const key =
-    inputKey.match(/([g-zG-Z])\w+/) !== null
-      ? bin(strToHex('talha'))
-      : inputKey.match(/([a-fA-F])\w+/) !== null
-      ? bin(inputKey)
-      : inputKey;
-
-  if (inputValue.trim().length > 0) {
-    let enc = '';
-    const msg = inputValue.match(/([g-zG-Z])\w+/) === null ? inputValue : strToHex(inputValue);
-
-    if (msg.length > 16)
-      for (let i = 0; i < Math.ceil(msg.length / 16); i++) {
-        let slicedMsg = msg.slice(i * 16, (i + 1) * 16);
-
-        if (slicedMsg.length < 16) slicedMsg = slicedMsg.padStart(16, '0');
-
-        enc += encode(bin(slicedMsg), key);
-      }
-    else enc = encode(bin(msg), key);
-
-    tbody.insertAdjacentHTML(
-      'beforeend',
-      html
-        .replace('%Plain%', `<b>Plain Text: </b>${inputValue}`)
-        .replace('%Cipher%', `<b>Cipher Text: </b>${enc}`),
-    );
-  } else alert('Please Enter Text to Encrypt. This Field Can Not Be Empty.');
-});
+encryptBtn.addEventListener('click', encDec);
 
 //************************************************************* */
 //************** DECRYPT BUTTON ****************** */
-decryptBtn.addEventListener('click', (e) => {
-  e.preventDefault();
-  const inputValue = formInput.value;
-  const inputKey = formKey.value;
-  const key =
-    inputKey.match(/([g-zG-Z])\w+/) !== null
-      ? bin(strToHex('talha'))
-      : inputKey.match(/([a-fA-F])\w+/) !== null
-      ? bin(inputKey)
-      : inputKey;
-
-  if (inputValue.trim().length > 0) {
-    let dec = '';
-    const msg = inputValue;
-
-    if (msg.length > 16)
-      for (let i = 0; i < Math.ceil(msg.length / 16); i++) {
-        let slicedMsg = msg.slice(i * 16, (i + 1) * 16);
-
-        const decodedStr = decode(bin(slicedMsg), key);
-
-        dec += decodedStr.match(/0+/)[0].length > 1 ? decodedStr.replace(/0+/, '') : decodedStr;
-      }
-    else dec = decode(bin(msg), key);
-
-    dec = hexToStr(dec);
-
-    tbody.insertAdjacentHTML(
-      'beforeend',
-      html
-        .replace('%Plain%', `<b>Cipher Text: </b>${inputValue}`)
-        .replace('%Cipher%', `<b>Plain Text: </b>${dec}`),
-    );
-  } else alert('Please Enter Text to Encrypt. This Field Can Not Be Empty.');
-});
+decryptBtn.addEventListener('click', encDec);
