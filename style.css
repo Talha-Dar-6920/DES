@@ -1,0 +1,163 @@
+html {
+  font-size: 62.5%;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  background-image: linear-gradient(45deg, rgba(128, 0, 128, 0.452) 49.5%, rgba(128, 128, 128, 0.459) 49.5%),
+    url(./image.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 1.6rem;
+  box-sizing: border-box;
+  position: relative;
+  color: white;
+}
+
+body,
+* {
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  text-align: center;
+  padding: 4rem 0 2rem;
+  font-size: 4rem;
+}
+
+h2 {
+  text-align: center;
+  font-size: 2.5rem;
+}
+
+h3 {
+  padding: 1rem;
+}
+
+.top__left {
+  position: absolute;
+  top: 4rem;
+  left: 2rem;
+}
+
+.top__right {
+  position: absolute;
+  top: 4rem;
+  right: 2rem;
+}
+
+.form {
+  width: 40%;
+  text-align: center;
+  margin: 7rem auto 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form__input {
+  width: 80%;
+  background-color: transparent;
+  border: 2px solid purple;
+  border-radius: 2rem;
+  outline: none;
+  padding: 0.8rem 2rem;
+  transition: all 0.5s ease;
+  color: rgba(255, 255, 255, 0.822);
+}
+
+.form__input:focus {
+  width: 90%;
+}
+
+.form__input--key {
+  width: 40%;
+  display: block;
+  margin: 2rem 0 0;
+}
+
+.form__input--key:focus {
+  width: 50%;
+}
+
+::-webkit-input-placeholder {
+  color: rgba(255, 255, 255, 0.822);
+  font-weight: bold;
+}
+
+.btn {
+  padding: 1rem 3rem;
+  border-radius: 5rem;
+  outline: none;
+  border: 1px solid grey;
+  margin: 2rem;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: all 0.5s ease;
+}
+
+.btn:hover {
+  box-shadow: 0.5rem 0.5rem 1rem rgba(128, 0, 128, 0.61);
+  transform: translateY(-5px);
+}
+
+.btn:active {
+  box-shadow: 0.3rem 0.3rem 0.5rem rgba(128, 0, 128, 0.61);
+  transform: translateY(-3px);
+}
+
+.btn__encrypt {
+  border: 2px solid purple;
+  background-color: purple;
+  color: white;
+  font-weight: bold;
+}
+
+.btn__encrypt:hover {
+  background-color: transparent;
+}
+
+.btn__decrypt {
+  border: 2px solid purple;
+  background-color: transparent;
+  color: white;
+  font-weight: bold;
+}
+
+.btn__decrypt:hover {
+  background-color: purple;
+}
+
+.table {
+  width: 70%;
+  border: 1px solid rgba(255, 255, 255, 0.822);
+  border-bottom: none;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.table__heading {
+  width: 50%;
+  padding-bottom: 1rem;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.822);
+}
+
+.table__heading--right {
+  width: 50%;
+  border-left: 1px solid rgba(255, 255, 255, 0.822);
+}
+
+.table__data {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.822);
+}
+
+.table__data--right {
+  border-left: 1px solid rgba(255, 255, 255, 0.822);
+}

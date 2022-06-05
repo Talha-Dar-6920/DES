@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DES Implementation</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>Computer Network Security</h1>
+    <h2>Additional Assignment For CLO3</h2>
+    <div class="top__left">
+      <h3>Name: Talha Dar</h3>
+      <h3>Roll NO: D-19-CSE-47</h3>
+    </div>
+    <div class="top__right">
+      <h3>Teacher: Engr. Samia Aijaz</h3>
+      <h3>Issue Date: 27-5-2022</h3>
+    </div>
+
+    <form class="form">
+      <input
+        type="text"
+        class="form__input"
+        id="form__input"
+        placeholder="Enter Text For Encryption Or Decryption"
+      />
+      <input
+        type="text"
+        class="form__input form__input--key"
+        id="form__input--key"
+        placeholder="Enter Key 8 Characters i.e., 64 Bits"
+      />
+      <div>
+        <button class="btn btn__encrypt" id="btn__encrypt">Encrypt</button>
+        <button class="btn btn__decrypt" id="btn__decrypt">Decrypt</button>
+      </div>
+    </form>
+
+    <table class="table">
+      <thead>
+        <tr class="table__row--main">
+          <th class="table__heading">Input</th>
+          <th class="table__heading table__heading--right">Output</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+
+    <script src="index.js"></script>
+  </body>
+</html>
