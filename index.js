@@ -188,6 +188,7 @@ const fetchData = async () => {
   console.log('this runs');
   const fetching = await fetch('https://todo-29872-default-rtdb.firebaseio.com/', {
     Method: 'GET',
+    mode: 'no-cors',
     Headers: {
       'content-type': 'application/json',
     },
